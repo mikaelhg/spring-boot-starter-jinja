@@ -29,7 +29,6 @@ import com.hubspot.jinjava.Jinjava;
 
 /**
  * @author Marco Andreini
- *
  */
 @Configuration
 @ConditionalOnClass(JinjaTemplateLoader.class)
@@ -43,33 +42,37 @@ public class JinjaAutoConfiguration {
 	@ConditionalOnMissingBean(name = "defaultSpringTemplateLoader")
 	public static class DefaultTemplateResolverConfiguration implements EnvironmentAware {
 
-		@Autowired
-		private final ResourceLoader resourceLoader = new DefaultResourceLoader();
+		private final ResourceLoader resourceLoader;
 
 		private RelaxedPropertyResolver environment;
 
-		@Override
+        public DefaultTemplateResolverConfiguration(final ResourceLoader resourceLoader) {
+            if (null == resourceLoader) {
+                this.resourceLoader = new DefaultResourceLoader();
+            } else {
+                this.resourceLoader = resourceLoader;
+            }
+        }
+
+        @Override
 		public void setEnvironment(Environment environment) {
 			this.environment = new RelaxedPropertyResolver(environment, "spring.jinja.");
 		}
 
 		@PostConstruct
 		public void checkTemplateLocationExists() {
-			Boolean checkTemplateLocation = this.environment
-					.getProperty("checkTemplateLocation", Boolean.class, true);
+			final Boolean checkTemplateLocation = this.environment.getProperty(
+					"checkTemplateLocation", Boolean.class, true);
 			if (checkTemplateLocation) {
-				Resource resource = this.resourceLoader
-						.getResource(this.environment.getProperty("prefix", DEFAULT_PREFIX));
-				Assert.state(resource.exists(), "Cannot find template location: "
-						+ resource +
-						" (please add some templates or check your jinjava configuration)");
+				final Resource resource = this.resourceLoader.getResource(
+				        this.environment.getProperty("prefix", DEFAULT_PREFIX));
+				Assert.state(resource.exists(), String.format("Cannot find template location: %s (please add some templates or check your jinjava configuration)", resource));
 			}
 		}
 
 		@Bean
 		public JinjaTemplateLoader defaultSpringTemplateLoader() {
-			JinjaTemplateLoader resolver = new JinjaTemplateLoader();
-
+			final JinjaTemplateLoader resolver = new JinjaTemplateLoader();
 			resolver.setBasePath(this.environment.getProperty("prefix", DEFAULT_PREFIX));
 			resolver.setSuffix(this.environment.getProperty("suffix", DEFAULT_SUFFIX));
 			return resolver;
@@ -77,8 +80,8 @@ public class JinjaAutoConfiguration {
 
 		@Bean
 		public Jinjava jinja(JinjaTemplateLoader loader) {
-			// TODO: aggiungere la jinjavaconfig
-			Jinjava engine = new Jinjava();
+			// TODO: Add the jinjavaconfig
+			final Jinjava engine = new Jinjava();
 			engine.setResourceLocator(loader);
 			return engine;
 		}
@@ -93,8 +96,12 @@ public class JinjaAutoConfiguration {
 
 		private RelaxedPropertyResolver environment;
 
+		private final Jinjava engine;
+
 		@Autowired
-		private Jinjava engine;
+		public JinjavaViewResolverConfiguration(final Jinjava engine) {
+			this.engine = engine;
+		}
 
 		@Override
 		public void setEnvironment(Environment environment) {
@@ -104,21 +111,22 @@ public class JinjaAutoConfiguration {
 		@Bean
 		@ConditionalOnMissingBean(name = "jinjaViewResolver")
 		public JinjaViewResolver jinjaViewResolver() {
-			final Charset encoding = Charset.forName(this.environment
-					.getProperty("encoding", "UTF-8"));
-			final JinjaViewResolver resolver = new JinjaViewResolver();
+            final Charset encoding = Charset.forName(this.environment.getProperty("encoding", "UTF-8"));
+            final JinjaViewResolver resolver = new JinjaViewResolver();
 			resolver.setCharset(encoding);
 			resolver.setEngine(engine);
 
-			resolver.setContentType(appendCharset(
-					this.environment.getProperty("contentType", "text/html"),
+			resolver.setContentType(
+			        appendCharset(this.environment.getProperty("contentType", "text/html"),
 					encoding.name()));
 
 			resolver.setViewNames(this.environment.getProperty("viewNames", String[].class));
+
 			// This resolver acts as a fallback resolver (e.g. like a
 			// InternalResourceViewResolver) so it needs to have low precedence
 			resolver.setOrder(this.environment.getProperty("resolver.order",
 					Integer.class, Ordered.LOWEST_PRECEDENCE - 50));
+
 			return resolver;
 		}
 
@@ -127,13 +135,15 @@ public class JinjaAutoConfiguration {
 			return new BeanPostProcessor() {
 
 				@Override
-				public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+				public Object postProcessBeforeInitialization(final Object bean, final String beanName) {
 					return bean;
 				}
 
 				@Override
-				public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-					JinjaHelper annotation = AnnotationUtils.findAnnotation(bean.getClass(), JinjaHelper.class);
+				public Object postProcessAfterInitialization(final Object bean, final String beanName)
+                        throws BeansException
+                {
+					final JinjaHelper annotation = AnnotationUtils.findAnnotation(bean.getClass(), JinjaHelper.class);
 					if (annotation != null) {
 						engine.getGlobalContext().put(beanName, bean);
 					}

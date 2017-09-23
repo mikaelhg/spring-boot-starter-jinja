@@ -13,36 +13,38 @@ import lombok.Setter;
 
 /**
  * @author Marco Andreini
- *
  */
 public class JinjaViewResolver extends AbstractTemplateViewResolver {
 
-	@Setter
-	private Jinjava engine;
-	@Setter
-	private Charset charset = Charsets.UTF_8;
-	@Setter
-	private boolean renderExceptions = false;
-	@Getter @Setter
-	private String contentType = "text/html;charset=UTF-8";
+    @Setter
+    private Jinjava engine;
 
-	public JinjaViewResolver() {
-		setViewClass(requiredViewClass());
-	}
+    @Setter
+    private Charset charset = Charsets.UTF_8;
 
-	@Override
-	protected Class<?> requiredViewClass() {
-		return JinjaView.class;
-	}
+    @Setter
+    private boolean renderExceptions = false;
 
-	@Override
-	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
-		JinjaView view = (JinjaView) super.buildView(viewName);
-		view.setEngine(this.engine);
-		view.setContentType(contentType);
-		view.setRenderExceptions(renderExceptions);
-		view.setEncoding(charset);
-		return view;
-	}
+    @Getter @Setter
+    private String contentType = "text/html;charset=UTF-8";
+
+    public JinjaViewResolver() {
+        setViewClass(requiredViewClass());
+    }
+
+    @Override
+    protected Class<?> requiredViewClass() {
+        return JinjaView.class;
+    }
+
+    @Override
+    protected AbstractUrlBasedView buildView(String viewName) throws Exception {
+        final JinjaView view = (JinjaView) super.buildView(viewName);
+        view.setEngine(this.engine);
+        view.setContentType(contentType);
+        view.setRenderExceptions(renderExceptions);
+        view.setEncoding(charset);
+        return view;
+    }
 
 }

@@ -14,3 +14,10 @@ hs_err_pid*
 /target/
 /.settings/
 /.classpath
+
+target/
+.idea/
+*.iml
+/dump.*
+/application-default.yml
+/*.log

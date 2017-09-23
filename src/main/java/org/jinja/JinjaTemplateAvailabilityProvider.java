@@ -5,25 +5,26 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
 
+import static org.jinja.JinjaAutoConfiguration.DEFAULT_PREFIX;
+import static org.jinja.JinjaAutoConfiguration.DEFAULT_SUFFIX;
+
 /**
  * @author Marco Andreini
- *
  */
-public class JinjaTemplateAvailabilityProvider
-	implements TemplateAvailabilityProvider {
+public class JinjaTemplateAvailabilityProvider implements TemplateAvailabilityProvider {
 
-	@Override
+    public static final String CLASS_NAME = "org.jinja.JinjaTemplateLoader";
+
+    @Override
 	public boolean isTemplateAvailable(String view, Environment environment,
-			ClassLoader classLoader, ResourceLoader resourceLoader) {
-		if (ClassUtils.isPresent("org.jinja.JinjaTemplateLoader",
-				classLoader)) {
-			String prefix = environment.getProperty("spring.jinja.prefix",
-					JinjaAutoConfiguration.DEFAULT_PREFIX);
-			String suffix = environment.getProperty("spring.jinja.suffix",
-					JinjaAutoConfiguration.DEFAULT_SUFFIX);
+			ClassLoader classLoader, ResourceLoader resourceLoader)
+	{
+		if (ClassUtils.isPresent(CLASS_NAME, classLoader)) {
+			final String prefix = environment.getProperty("spring.jinja.prefix", DEFAULT_PREFIX);
+			final String suffix = environment.getProperty("spring.jinja.suffix", DEFAULT_SUFFIX);
 			return resourceLoader.getResource(prefix + view + suffix).exists();
 		}
-
 		return false;
 	}
+
 }

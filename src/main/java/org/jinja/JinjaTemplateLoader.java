@@ -19,35 +19,35 @@ import lombok.Setter;
 
 /**
  * @author Marco Andreini
- *
  */
 public class JinjaTemplateLoader implements ResourceLocator, ServletContextAware {
 
-	private ResourceLoader resourceLoader;
-	@Setter
-	private String basePath = "";
-	@Setter
-	private String suffix = ".html";
+    private ResourceLoader resourceLoader;
 
-	@Setter
-	private ServletContext servletContext;
+    @Setter
+    private String basePath = "";
 
-	@PostConstruct
-	public void init() {
-		if (this.resourceLoader == null) {
-			this.resourceLoader = new ServletContextResourceLoader(servletContext);
-		}
-	}
+    @Setter
+    private String suffix = ".html";
+
+    @Setter
+    private ServletContext servletContext;
+
+    @PostConstruct
+    public void init() {
+        if (this.resourceLoader == null) {
+            this.resourceLoader = new ServletContextResourceLoader(servletContext);
+        }
+    }
 
     @Override
-	public String getString(String fullName, Charset encoding,
-			JinjavaInterpreter interpreter) throws IOException {
-    	Preconditions.checkNotNull(resourceLoader, "post construct not called");
-    	Preconditions.checkNotNull(fullName);
-    	Preconditions.checkNotNull(encoding);
+    public String getString(final String fullName, final Charset encoding,
+                            final JinjavaInterpreter interpreter) throws IOException {
+        Preconditions.checkNotNull(resourceLoader, "post construct not called");
+        Preconditions.checkNotNull(fullName);
+        Preconditions.checkNotNull(encoding);
+        final String name = fullName.contains(".") ? (basePath + fullName) : (basePath + fullName + suffix);
+        return Files.toString(resourceLoader.getResource(name).getFile(), encoding);
+    }
 
-		return Files.toString(resourceLoader
-				.getResource((fullName.contains(".") ? (basePath + fullName) :
-					(basePath + fullName + suffix))).getFile(), encoding);
-	}
 }
