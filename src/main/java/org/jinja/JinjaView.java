@@ -9,30 +9,24 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 
 import com.google.common.base.Charsets;
 import com.hubspot.jinjava.Jinjava;
 import com.hubspot.jinjava.interpret.FatalTemplateErrorsException;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * @author Marco Andreini
  */
 public class JinjaView extends AbstractTemplateView {
 
-    @Getter @Setter
     private Charset encoding = Charsets.UTF_8;
 
-    @Getter @Setter
     private Jinjava engine;
 
-    @Getter @Setter
     private boolean renderExceptions = false;
 
-    @Getter @Setter
     private String contentType;
 
     @Override
@@ -91,6 +85,41 @@ public class JinjaView extends AbstractTemplateView {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    public Charset getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(Charset encoding) {
+        this.encoding = encoding;
+    }
+
+    public Jinjava getEngine() {
+        return engine;
+    }
+
+    public void setEngine(Jinjava engine) {
+        this.engine = engine;
+    }
+
+    public boolean isRenderExceptions() {
+        return renderExceptions;
+    }
+
+    public void setRenderExceptions(boolean renderExceptions) {
+        this.renderExceptions = renderExceptions;
+    }
+
+    @Nullable
+    @Override
+    public String getContentType() {
+        return contentType;
+    }
+
+    @Override
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
 }
