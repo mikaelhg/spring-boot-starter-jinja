@@ -33,14 +33,13 @@ public class JinjaView extends AbstractTemplateView {
     protected void renderMergedTemplateModel(
             final Map<String, Object> model,
             final HttpServletRequest request,
-            final HttpServletResponse response) throws Exception
-    {
+            final HttpServletResponse response) throws Exception {
         doRender(model, response);
     }
 
-    private void doRender(Map<String, Object> model,
-                          HttpServletResponse response) throws IOException {
-
+    private void doRender(final Map<String, Object> model,
+                          final HttpServletResponse response) throws IOException
+    {
         logger.trace(String.format("Rendering Jinja template [%s] in JinjaView '%s'", getUrl(), getBeanName()));
 
         if (contentType != null) {
@@ -65,7 +64,7 @@ public class JinjaView extends AbstractTemplateView {
         } else {
             try {
                 responseWriter.write(engine.render(getTemplate(), model));
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 logger.error(String.format("failed to render template [%s]\n", getUrl()), e);
             }
         }
@@ -77,7 +76,7 @@ public class JinjaView extends AbstractTemplateView {
     }
 
     @Override
-    public boolean checkResource(Locale locale) throws Exception {
+    public boolean checkResource(final Locale locale) throws Exception {
         try {
             // XXX: interpreter could be null...
             engine.getResourceLocator().getString(getUrl(), encoding, null);
@@ -91,7 +90,7 @@ public class JinjaView extends AbstractTemplateView {
         return encoding;
     }
 
-    public void setEncoding(Charset encoding) {
+    public void setEncoding(final Charset encoding) {
         this.encoding = encoding;
     }
 
@@ -99,7 +98,7 @@ public class JinjaView extends AbstractTemplateView {
         return engine;
     }
 
-    public void setEngine(Jinjava engine) {
+    public void setEngine(final Jinjava engine) {
         this.engine = engine;
     }
 
@@ -107,7 +106,7 @@ public class JinjaView extends AbstractTemplateView {
         return renderExceptions;
     }
 
-    public void setRenderExceptions(boolean renderExceptions) {
+    public void setRenderExceptions(final boolean renderExceptions) {
         this.renderExceptions = renderExceptions;
     }
 
@@ -118,7 +117,7 @@ public class JinjaView extends AbstractTemplateView {
     }
 
     @Override
-    public void setContentType(String contentType) {
+    public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
 

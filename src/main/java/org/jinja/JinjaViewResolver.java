@@ -1,13 +1,12 @@
 package org.jinja;
 
-import java.nio.charset.Charset;
-
+import com.google.common.base.Charsets;
+import com.hubspot.jinjava.Jinjava;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
-import com.google.common.base.Charsets;
-import com.hubspot.jinjava.Jinjava;
+import java.nio.charset.Charset;
 
 /**
  * @author Marco Andreini

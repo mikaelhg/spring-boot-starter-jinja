@@ -1,10 +1,6 @@
 package org.jinja;
 
-import java.nio.charset.Charset;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.Servlet;
-
+import com.hubspot.jinjava.Jinjava;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -12,8 +8,8 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,9 +21,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 
-import com.hubspot.jinjava.Jinjava;
+import javax.annotation.PostConstruct;
+import java.nio.charset.Charset;
 
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
+import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.REACTIVE;
 
 /**
  * @author Marco Andreini
@@ -37,16 +35,17 @@ import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebA
 @AutoConfigureAfter({WebMvcAutoConfiguration.class, WebFluxAutoConfiguration.class})
 public class JinjaAutoConfiguration {
 
-	public static final String DEFAULT_PREFIX = "classpath:/templates/";
-	public static final String DEFAULT_SUFFIX = ".html";
+    public static final String DEFAULT_PREFIX = "classpath:/templates/";
 
-	@Configuration
-	@ConditionalOnMissingBean(name = "defaultSpringTemplateLoader")
-	public static class DefaultTemplateResolverConfiguration implements EnvironmentAware {
+    public static final String DEFAULT_SUFFIX = ".html";
 
-		private final ResourceLoader resourceLoader;
+    @Configuration
+    @ConditionalOnMissingBean(name = "defaultSpringTemplateLoader")
+    public static class DefaultTemplateResolverConfiguration implements EnvironmentAware {
 
-		private Environment environment;
+        private final ResourceLoader resourceLoader;
+
+        private Environment environment;
 
         public DefaultTemplateResolverConfiguration(final ResourceLoader resourceLoader) {
             if (null == resourceLoader) {
@@ -57,108 +56,107 @@ public class JinjaAutoConfiguration {
         }
 
         @Override
-		public void setEnvironment(final Environment environment) {
-			this.environment = environment;
-		}
+        public void setEnvironment(final Environment environment) {
+            this.environment = environment;
+        }
 
-		@PostConstruct
-		public void checkTemplateLocationExists() {
-			final Boolean checkTemplateLocation = this.environment.getProperty(
-					"checkTemplateLocation", Boolean.class, true);
-			if (checkTemplateLocation) {
-				final Resource resource = this.resourceLoader.getResource(
-				        this.environment.getProperty("spring.jinja.prefix", DEFAULT_PREFIX));
-				Assert.state(resource.exists(), String.format("Cannot find template location: %s (please add some templates or check your jinjava configuration)", resource));
-			}
-		}
+        @PostConstruct
+        public void checkTemplateLocationExists() {
+            final Boolean checkTemplateLocation = this.environment.getProperty(
+                    "checkTemplateLocation", Boolean.class, true);
+            if (checkTemplateLocation) {
+                final Resource resource = this.resourceLoader.getResource(
+                        this.environment.getProperty("spring.jinja.prefix", DEFAULT_PREFIX));
+                Assert.state(resource.exists(), String.format("Cannot find template location: %s (please add some templates or check your jinjava configuration)", resource));
+            }
+        }
 
-		@Bean
-		public JinjaTemplateLoader defaultSpringTemplateLoader() {
-			final JinjaTemplateLoader resolver = new JinjaTemplateLoader();
-			resolver.setBasePath(this.environment.getProperty("spring.jinja.prefix", DEFAULT_PREFIX));
-			resolver.setSuffix(this.environment.getProperty("spring.jinja.suffix", DEFAULT_SUFFIX));
-			return resolver;
-		}
+        @Bean
+        public JinjaTemplateLoader defaultSpringTemplateLoader() {
+            final JinjaTemplateLoader resolver = new JinjaTemplateLoader();
+            resolver.setBasePath(this.environment.getProperty("spring.jinja.prefix", DEFAULT_PREFIX));
+            resolver.setSuffix(this.environment.getProperty("spring.jinja.suffix", DEFAULT_SUFFIX));
+            return resolver;
+        }
 
-		@Bean
-		public Jinjava jinja(JinjaTemplateLoader loader) {
-			// TODO: Add the jinjavaconfig
-			final Jinjava engine = new Jinjava();
-			engine.setResourceLocator(loader);
-			return engine;
-		}
+        @Bean
+        public Jinjava jinja(JinjaTemplateLoader loader) {
+            // TODO: Add the jinjavaconfig
+            final Jinjava engine = new Jinjava();
+            engine.setResourceLocator(loader);
+            return engine;
+        }
 
-	}
+    }
 
 
-	@Configuration
-	@ConditionalOnWebApplication(type = SERVLET)
-	protected static class JinjavaViewResolverConfiguration implements EnvironmentAware {
+    @Configuration
+    @ConditionalOnWebApplication(type = SERVLET)
+    protected static class JinjavaViewResolverConfiguration implements EnvironmentAware {
 
-		private Environment environment;
+        private Environment environment;
 
-		private final Jinjava engine;
+        private final Jinjava engine;
 
-		@Autowired
-		public JinjavaViewResolverConfiguration(final Jinjava engine) {
-			this.engine = engine;
-		}
+        @Autowired
+        public JinjavaViewResolverConfiguration(final Jinjava engine) {
+            this.engine = engine;
+        }
 
-		@Override
-		public void setEnvironment(final Environment environment) {
-			this.environment = environment;
-		}
+        @Override
+        public void setEnvironment(final Environment environment) {
+            this.environment = environment;
+        }
 
-		@Bean
-		@ConditionalOnMissingBean(name = "jinjaViewResolver")
-		public JinjaViewResolver jinjaViewResolver() {
+        @Bean
+        @ConditionalOnMissingBean(name = "jinjaViewResolver")
+        public JinjaViewResolver jinjaViewResolver() {
             final Charset encoding = Charset.forName(this.environment.getProperty("spring.jinja.encoding", "UTF-8"));
             final JinjaViewResolver resolver = new JinjaViewResolver();
-			resolver.setCharset(encoding);
-			resolver.setEngine(engine);
+            resolver.setCharset(encoding);
+            resolver.setEngine(engine);
 
-			resolver.setContentType(
-			        appendCharset(this.environment.getProperty("spring.jinja.contentType", "text/html"),
-					encoding.name()));
+            resolver.setContentType(
+                    appendCharset(this.environment.getProperty("spring.jinja.contentType", "text/html"),
+                            encoding.name()));
 
-			resolver.setViewNames(this.environment.getProperty("spring.jinja.viewNames", String[].class));
+            resolver.setViewNames(this.environment.getProperty("spring.jinja.viewNames", String[].class));
 
-			// This resolver acts as a fallback resolver (e.g. like a
-			// InternalResourceViewResolver) so it needs to have low precedence
-			resolver.setOrder(this.environment.getProperty("spring.jinja.resolver.order",
-					Integer.class, Ordered.LOWEST_PRECEDENCE - 50));
+            // This resolver acts as a fallback resolver (e.g. like a
+            // InternalResourceViewResolver) so it needs to have low precedence
+            resolver.setOrder(this.environment.getProperty("spring.jinja.resolver.order",
+                    Integer.class, Ordered.LOWEST_PRECEDENCE - 50));
 
-			return resolver;
-		}
+            return resolver;
+        }
 
-		@Bean
-		public BeanPostProcessor jinjaBeanPostProcessor() {
-			return new BeanPostProcessor() {
+        @Bean
+        public BeanPostProcessor jinjaBeanPostProcessor() {
+            return new BeanPostProcessor() {
 
-				@Override
-				public Object postProcessBeforeInitialization(final Object bean, final String beanName) {
-					return bean;
-				}
+                @Override
+                public Object postProcessBeforeInitialization(final Object bean, final String beanName) {
+                    return bean;
+                }
 
-				@Override
-				public Object postProcessAfterInitialization(final Object bean, final String beanName)
-                        throws BeansException
-                {
-					final JinjaHelper annotation = AnnotationUtils.findAnnotation(bean.getClass(), JinjaHelper.class);
-					if (annotation != null) {
-						engine.getGlobalContext().put(beanName, bean);
-					}
-					return bean;
-				}
-			};
-		}
+                @Override
+                public Object postProcessAfterInitialization(final Object bean, final String beanName)
+                        throws BeansException {
+                    final JinjaHelper annotation = AnnotationUtils.findAnnotation(bean.getClass(), JinjaHelper.class);
+                    if (annotation != null) {
+                        engine.getGlobalContext().put(beanName, bean);
+                    }
+                    return bean;
+                }
+            };
+        }
 
 
-		private String appendCharset(String type, String charset) {
-			if (type.contains("charset=")) {
-				return type;
-			}
-			return type + ";charset=" + charset;
-		}
-	}
+        private String appendCharset(final String type, final String charset) {
+            if (type.contains("charset=")) {
+                return type;
+            }
+            return type + ";charset=" + charset;
+        }
+    }
 }
