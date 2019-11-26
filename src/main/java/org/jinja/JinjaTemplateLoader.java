@@ -40,7 +40,7 @@ public class JinjaTemplateLoader implements ResourceLocator, ServletContextAware
         Preconditions.checkNotNull(resourceLoader, "post construct not called");
         Preconditions.checkNotNull(fullName);
         Preconditions.checkNotNull(encoding);
-        final String name = fullName.contains(".") ? (getBasePath() + fullName) : (getBasePath() + fullName + getSuffix());
+        final var name = fullName.contains(".") ? (getBasePath() + fullName) : (getBasePath() + fullName + getSuffix());
         return Files.toString(resourceLoader.getResource(name).getFile(), encoding);
     }
 
@@ -48,7 +48,7 @@ public class JinjaTemplateLoader implements ResourceLocator, ServletContextAware
         return basePath;
     }
 
-    public void setBasePath(String basePath) {
+    public void setBasePath(final String basePath) {
         this.basePath = basePath;
     }
 
@@ -65,7 +65,7 @@ public class JinjaTemplateLoader implements ResourceLocator, ServletContextAware
     }
 
     @Override
-    public void setServletContext(ServletContext servletContext) {
+    public void setServletContext(final ServletContext servletContext) {
         this.servletContext = servletContext;
     }
 

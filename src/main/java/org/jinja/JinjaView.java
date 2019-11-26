@@ -33,7 +33,8 @@ public class JinjaView extends AbstractTemplateView {
     protected void renderMergedTemplateModel(
             final Map<String, Object> model,
             final HttpServletRequest request,
-            final HttpServletResponse response) throws Exception {
+            final HttpServletResponse response) throws Exception
+    {
         doRender(model, response);
     }
 
@@ -46,7 +47,7 @@ public class JinjaView extends AbstractTemplateView {
             response.setContentType(contentType);
         }
 
-        PrintWriter responseWriter = response.getWriter();
+        final var responseWriter = response.getWriter();
 
         if (renderExceptions) {
             try {

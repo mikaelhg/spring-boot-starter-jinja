@@ -32,7 +32,7 @@ public class JinjaViewResolver extends AbstractTemplateViewResolver {
 
     @Override
     protected AbstractUrlBasedView buildView(String viewName) throws Exception {
-        final JinjaView view = (JinjaView) super.buildView(viewName);
+        final var view = (JinjaView) super.buildView(viewName);
         view.setEngine(this.engine);
         view.setContentType(contentType);
         view.setRenderExceptions(renderExceptions);

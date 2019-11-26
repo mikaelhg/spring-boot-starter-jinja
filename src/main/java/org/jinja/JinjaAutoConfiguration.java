@@ -62,10 +62,10 @@ public class JinjaAutoConfiguration {
 
         @PostConstruct
         public void checkTemplateLocationExists() {
-            final Boolean checkTemplateLocation = this.environment.getProperty(
+            final var checkTemplateLocation = this.environment.getProperty(
                     "checkTemplateLocation", Boolean.class, true);
             if (checkTemplateLocation) {
-                final Resource resource = this.resourceLoader.getResource(
+                final var resource = this.resourceLoader.getResource(
                         this.environment.getProperty("spring.jinja.prefix", DEFAULT_PREFIX));
                 Assert.state(resource.exists(), String.format("Cannot find template location: %s (please add some templates or check your jinjava configuration)", resource));
             }
@@ -73,22 +73,20 @@ public class JinjaAutoConfiguration {
 
         @Bean
         public JinjaTemplateLoader defaultSpringTemplateLoader() {
-            final JinjaTemplateLoader resolver = new JinjaTemplateLoader();
+            var resolver = new JinjaTemplateLoader();
             resolver.setBasePath(this.environment.getProperty("spring.jinja.prefix", DEFAULT_PREFIX));
             resolver.setSuffix(this.environment.getProperty("spring.jinja.suffix", DEFAULT_SUFFIX));
             return resolver;
         }
 
         @Bean
-        public Jinjava jinja(JinjaTemplateLoader loader) {
-            // TODO: Add the jinjavaconfig
-            final Jinjava engine = new Jinjava();
+        public Jinjava jinja(final JinjaTemplateLoader loader) {
+            final var engine = new Jinjava();
             engine.setResourceLocator(loader);
             return engine;
         }
 
     }
-
 
     @Configuration
     @ConditionalOnWebApplication(type = SERVLET)
@@ -111,8 +109,9 @@ public class JinjaAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean(name = "jinjaViewResolver")
         public JinjaViewResolver jinjaViewResolver() {
-            final Charset encoding = Charset.forName(this.environment.getProperty("spring.jinja.encoding", "UTF-8"));
-            final JinjaViewResolver resolver = new JinjaViewResolver();
+            final var encoding = Charset.forName(
+                    this.environment.getProperty("spring.jinja.encoding", "UTF-8"));
+            final var resolver = new JinjaViewResolver();
             resolver.setCharset(encoding);
             resolver.setEngine(engine);
 
@@ -141,8 +140,9 @@ public class JinjaAutoConfiguration {
 
                 @Override
                 public Object postProcessAfterInitialization(final Object bean, final String beanName)
-                        throws BeansException {
-                    final JinjaHelper annotation = AnnotationUtils.findAnnotation(bean.getClass(), JinjaHelper.class);
+                        throws BeansException
+                {
+                    final var annotation = AnnotationUtils.findAnnotation(bean.getClass(), JinjaHelper.class);
                     if (annotation != null) {
                         engine.getGlobalContext().put(beanName, bean);
                     }
